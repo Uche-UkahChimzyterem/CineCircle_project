@@ -1,9 +1,7 @@
-
-
 ```markdown
 # Cinecircle
 
-**Cinecircle** is a sleek movie review and rating web application that gives users the ability to discover, search, review, and rate movies. While everyone can access the homepage, users must sign up or log in to search for movies, write reviews, leave star ratings, and view their review history.
+Cinecircle is a sleek movie review and rating web application that gives users the ability to discover, search, review, and rate movies. While everyone can access the homepage, users must sign up or log in to search for movies, write reviews, leave star ratings, and view their review history.
 
 ---
 
@@ -15,37 +13,35 @@ Cinecircle provides a simple, elegant way to manage and engage with movie conten
 
 ## Features
 
-- **Home, About, Contact Pages**  
+- Home, About, Contact Pages 
   Static pages for public visitors to explore the platform.
 
-- **User Authentication**  
+- User Authentication 
   Secure signup and login system for movie enthusiasts.
 
-- **Movie Search System**  
+- Movie Search System  
   Logged-in users can search for movies and access detailed info.
 
-- **Star Rating & Reviews**  
+- Star Rating & Reviews 
   Users can leave detailed reviews and star-based ratings.
 
-- **User Dashboard**  
+- User Dashboard  
   Logged-in users can view their past reviews and activity.
 
-- **Conditional Rendering**  
+- Conditional Rendering  
   Once logged in, the homepage hides and movie features take over.
 
-- **Responsive Design**  
+- Responsive Design  
   Fully optimized for mobile, tablet, and desktop screens.
 
 ---
 
-## Technologies Used
-
-### 🔹 Frontend
-- **Framework**: React + Vite
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Icons**: Lucide React
-- **State Management**: React Hooks
+### Frontend
+- Framework: React + Vite
+- Language: TypeScript
+- Styling: Tailwind CSS
+- Icons: Lucide React
+- State Management: React Hooks
 
 ---
 
@@ -55,33 +51,6 @@ The live version of Cinecircle is hosted on Vercel and accessible here:
 👉 [https://cinecircle.vercel.app](https://cinecircle.vercel.app) *(Replace with actual link after deploy)*
 
 ---
-
-## Project Structure
-
-```
-
-cinecircle/
-│
-├── public/
-│   └── index.html
-├── src/
-│   ├── components/     # NavBar, StarRating, ReviewCard, etc.
-│   ├── pages/          # HomePage, SearchPage, ReviewPage
-│   ├── App.tsx         # Main app router and logic
-│   └── main.tsx        # App entry point
-├── package.json
-├── tailwind.config.js
-└── vite.config.ts
-
-````
-
----
-
-### clone the Repository
-
-```bash
-git clone https://github.com/Uche-UkahChimzyterem/Cinecircle.git
-````
 
 ### Navigate into the project
 
