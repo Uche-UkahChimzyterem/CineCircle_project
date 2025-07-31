@@ -1,5 +1,4 @@
-
-````
+````markdown
 # Cinecircle
 
 Cinecircle is a sleek movie review and rating web application that gives users the ability to discover, search, review, and rate movies. While everyone can access the homepage, users must sign up or log in to search for movies, write reviews, leave star ratings, and view their review history.
@@ -66,7 +65,7 @@ Create a `.env` file in the project root and add the following variables:
 VITE_SUPABASE_URL=your-supabase-project-url
 VITE_SUPABASE_ANON_KEY=your-anon-public-api-key
 VITE_TMDB_API_KEY=your-tmdb-api-key
----
+````
 
 Replace the placeholders with your actual API keys.
 
@@ -147,19 +146,5 @@ For questions, suggestions, or feedback, feel free to contact:
 This project is licensed under the **MIT License**.
 See the `LICENSE` file for more details.
 
----
+```
 
----
-
-You can copy this fully merged content into your `README.md` file and then:
-
-1. Save the file.
-2. Add, commit, and push to GitHub:
-
-```bash
-git add README.md
-git commit -m "Resolve README.md merge conflicts and update with backend info"
-git push origin main
-````
-
-Let me know if you want me to help with that part!
