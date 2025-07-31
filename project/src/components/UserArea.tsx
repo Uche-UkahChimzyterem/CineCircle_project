@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogOut, Search, Star, Film, User, Calendar, TrendingUp } from 'lucide-react';
+import { LogOut, Search, Star, Film, User, TrendingUp } from 'lucide-react';
 import MovieSearch from './MovieSearch';
 import ReviewForm from './ReviewForm';
 import UserReports from './UserReports';
@@ -11,9 +11,23 @@ interface UserAreaProps {
   reviews: Review[];
   onAddReview: (review: Omit<Review, 'id' | 'createdAt'>) => void;
   onLogout: () => void;
+  onSearch: (query: string) => Promise<void>;
+  isSearching: boolean;
+  searchTerm: string;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const UserArea: React.FC<UserAreaProps> = ({ user, movies, reviews, onAddReview, onLogout }) => {
+const UserArea: React.FC<UserAreaProps> = ({
+  user,
+  movies,
+  reviews,
+  onAddReview,
+  onLogout,
+  onSearch,
+  isSearching,
+  searchTerm,
+  setSearchTerm,
+}) => {
   const [currentView, setCurrentView] = useState<'search' | 'review' | 'reports'>('search');
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -31,7 +45,7 @@ const UserArea: React.FC<UserAreaProps> = ({ user, movies, reviews, onAddReview,
         userId: user.id,
         userName: user.name,
         rating,
-        comment
+        comment,
       });
       setSuccessMessage('Review submitted successfully!');
       setTimeout(() => setSuccessMessage(''), 3000);
@@ -39,8 +53,10 @@ const UserArea: React.FC<UserAreaProps> = ({ user, movies, reviews, onAddReview,
     }
   };
 
-  const userReviews = reviews.filter(review => review.userId === user.id);
-  const movieReviews = selectedMovie ? reviews.filter(review => review.movieId === selectedMovie.id) : [];
+  const userReviews = reviews.filter((review) => review.userId === user.id);
+  const movieReviews = selectedMovie
+    ? reviews.filter((review) => review.movieId === selectedMovie.id)
+    : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-blue-900 to-teal-900">
@@ -52,7 +68,7 @@ const UserArea: React.FC<UserAreaProps> = ({ user, movies, reviews, onAddReview,
               <Film className="h-8 w-8 text-cyan-400" />
               <span className="text-2xl font-bold text-white">CineCircle</span>
             </div>
-            
+
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2 text-gray-300">
                 <User className="h-5 w-5" />
@@ -91,7 +107,7 @@ const UserArea: React.FC<UserAreaProps> = ({ user, movies, reviews, onAddReview,
               onClick={() => setCurrentView('reports')}
               className={`py-4 px-2 border-b-2 font-medium transition-colors ${
                 currentView === 'reports'
-                ? 'border-cyan-400 text-cyan-400'
+                  ? 'border-cyan-400 text-cyan-400'
                   : 'border-transparent text-gray-300 hover:text-white'
               }`}
             >
@@ -116,7 +132,14 @@ const UserArea: React.FC<UserAreaProps> = ({ user, movies, reviews, onAddReview,
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {currentView === 'search' && (
-          <MovieSearch movies={movies} onMovieSelect={handleMovieSelect} />
+          <MovieSearch
+            movies={movies}
+            onMovieSelect={handleMovieSelect}
+            onSearch={onSearch}
+            isSearching={isSearching}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
         )}
 
         {currentView === 'review' && selectedMovie && (
@@ -132,9 +155,15 @@ const UserArea: React.FC<UserAreaProps> = ({ user, movies, reviews, onAddReview,
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold text-white mb-4">{selectedMovie.title}</h1>
                   <div className="space-y-2 text-gray-300 mb-6">
-                    <p><span className="font-semibold">Year:</span> {selectedMovie.year}</p>
-                    <p><span className="font-semibold">Genre:</span> {selectedMovie.genre}</p>
-                    <p><span className="font-semibold">Director:</span> {selectedMovie.director}</p>
+                    <p>
+                      <span className="font-semibold">Year:</span> {selectedMovie.year}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Genre:</span> {selectedMovie.genre}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Director:</span> {selectedMovie.director}
+                    </p>
                   </div>
                   <button
                     onClick={() => setShowReviewForm(true)}
@@ -173,9 +202,7 @@ const UserArea: React.FC<UserAreaProps> = ({ user, movies, reviews, onAddReview,
                           </div>
                           <div>
                             <p className="font-semibold text-white">{review.userName}</p>
-                            <p className="text-sm text-gray-400">
-                              {review.createdAt.toLocaleDateString()}
-                            </p>
+                            <p className="text-sm text-gray-400">{new Date(review.createdAt).toLocaleDateString()}</p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-1">
@@ -183,9 +210,7 @@ const UserArea: React.FC<UserAreaProps> = ({ user, movies, reviews, onAddReview,
                             <Star
                               key={i}
                               className={`h-5 w-5 ${
-                                i < review.rating
-                                  ? 'text-yellow-400 fill-current'
-                                  : 'text-gray-400'
+                                i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-400'
                               }`}
                             />
                           ))}
@@ -200,9 +225,7 @@ const UserArea: React.FC<UserAreaProps> = ({ user, movies, reviews, onAddReview,
           </div>
         )}
 
-        {currentView === 'reports' && (
-          <UserReports user={user} reviews={userReviews} movies={movies} />
-        )}
+        {currentView === 'reports' && <UserReports user={user} reviews={userReviews} movies={movies} />}
       </main>
     </div>
   );

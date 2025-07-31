@@ -5,29 +5,28 @@ import { Movie } from '../types';
 interface MovieSearchProps {
   movies: Movie[];
   onMovieSelect: (movie: Movie) => void;
+  onSearch: (query: string) => Promise<void>;
+  isSearching: boolean;
+  searchTerm: string;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const MovieSearch: React.FC<MovieSearchProps> = ({ movies, onMovieSelect }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<Movie[]>([]);
+const MovieSearch: React.FC<MovieSearchProps> = ({
+  movies,
+  onMovieSelect,
+  onSearch,
+  isSearching,
+  searchTerm,
+  setSearchTerm
+}) => {
   const [hasSearched, setHasSearched] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setHasSearched(true);
-    
-    if (!searchTerm.trim()) {
-      setSearchResults([]);
-      return;
+    if (searchTerm.trim()) {
+      await onSearch(searchTerm);
     }
-
-    const results = movies.filter(movie =>
-      movie.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      movie.director.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      movie.genre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    
-    setSearchResults(results);
   };
 
   return (
@@ -56,15 +55,16 @@ const MovieSearch: React.FC<MovieSearchProps> = ({ movies, onMovieSelect }) => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 bg-indigo-700/50 border border-indigo-600 rounded-xl text-white placeholder-gray-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all text-lg"
-                placeholder="Enter movie title, director, or genre..."
+                placeholder="Enter movie title..."
               />
             </div>
           </div>
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105"
+            disabled={isSearching}
+            className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Search Movies
+            {isSearching ? 'Searching...' : 'Search Movies'}
           </button>
         </form>
       </div>
@@ -73,20 +73,18 @@ const MovieSearch: React.FC<MovieSearchProps> = ({ movies, onMovieSelect }) => {
       {hasSearched && (
         <div className="bg-indigo-800/50 backdrop-blur-sm rounded-2xl border border-indigo-700 p-8">
           <h2 className="text-2xl font-bold text-white mb-6">Search Results</h2>
-          
-          {searchResults.length === 0 ? (
+
+          {isSearching ? (
+            <p className="text-white text-center">Loading...</p>
+          ) : movies.length === 0 ? (
             <div className="text-center py-12">
               <Film className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-xl text-red-400 font-semibold mb-2">
-                Sorry, not yet in.
-              </p>
-              <p className="text-gray-400">
-                We couldn't find any movies matching your search. Try different keywords or check the spelling.
-              </p>
+              <p className="text-xl text-red-400 font-semibold mb-2">No results.</p>
+              <p className="text-gray-400">Try a different movie title.</p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {searchResults.map((movie) => (
+              {movies.map((movie) => (
                 <div
                   key={movie.id}
                   onClick={() => onMovieSelect(movie)}
@@ -99,9 +97,15 @@ const MovieSearch: React.FC<MovieSearchProps> = ({ movies, onMovieSelect }) => {
                   />
                   <h3 className="text-lg font-semibold text-white mb-2">{movie.title}</h3>
                   <div className="space-y-1 text-sm text-gray-400">
-                    <p><span className="font-medium">Year:</span> {movie.year}</p>
-                    <p><span className="font-medium">Genre:</span> {movie.genre}</p>
-                    <p><span className="font-medium">Director:</span> {movie.director}</p>
+                    <p>
+                      <span className="font-medium">Year:</span> {movie.year}
+                    </p>
+                    <p>
+                      <span className="font-medium">Genre:</span> {movie.genre}
+                    </p>
+                    <p>
+                      <span className="font-medium">Director:</span> {movie.director}
+                    </p>
                   </div>
                 </div>
               ))}
