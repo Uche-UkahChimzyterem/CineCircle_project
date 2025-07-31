@@ -16,13 +16,13 @@ function App() {
   const [searching, setSearching] = useState(false);
   const [genreMap, setGenreMap] = useState<Map<number, string>>(new Map());
 
-  // ✅ Log env var to catch undefined key
+  // Log TMDB API key status
   useEffect(() => {
     console.log('TMDB API KEY:', API_KEY || '❌ MISSING');
     if (!API_KEY) alert('Missing TMDB API Key. App may not work correctly.');
   }, []);
 
-  // ✅ Sync Supabase Auth state
+  // Sync Supabase Auth state
   useEffect(() => {
     const getSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -49,6 +49,7 @@ function App() {
         });
       } else {
         setUser(null);
+        setReviews([]); // Clear reviews when logged out
       }
     });
 
@@ -57,7 +58,7 @@ function App() {
     };
   }, []);
 
-  // ✅ Fetch genres from TMDB
+  // Fetch genres from TMDB API
   useEffect(() => {
     const fetchGenres = async () => {
       if (!API_KEY) return;
@@ -74,7 +75,44 @@ function App() {
     fetchGenres();
   }, []);
 
-  // ✅ Search movies from TMDB
+  // Fetch reviews from Supabase when user logs in
+  useEffect(() => {
+    if (!user) {
+      setReviews([]);
+      return;
+    }
+
+    const fetchReviews = async () => {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Error fetching reviews:', error.message);
+        return;
+      }
+
+      if (data) {
+        setReviews(
+          data.map((r) => ({
+            id: r.id,
+            movieId: r.movie_id,
+            rating: r.rating,
+            comment: r.comment,
+            createdAt: new Date(r.created_at),
+            userId: r.user_id,      
+            userName: r.user_name,
+          }))
+        );
+      }
+    };
+
+    fetchReviews();
+  }, [user]);
+
+  // Search movies from TMDB
   const searchMovies = async (query: string) => {
     if (!API_KEY || !query.trim()) return;
     setSearching(true);
@@ -128,7 +166,7 @@ function App() {
     }
   };
 
-  // ✅ Login
+  // Login
   const handleLogin = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return alert(`Login failed: ${error.message}`);
@@ -143,7 +181,7 @@ function App() {
     }
   };
 
-  // ✅ Signup
+  // Signup
   const handleSignup = async (email: string, password: string, name: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -162,7 +200,7 @@ function App() {
     }
   };
 
-  // ✅ Logout
+  // Logout
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -170,17 +208,45 @@ function App() {
     setMovies([]);
   };
 
-  // ✅ Add Review
-  const addReview = (review: Omit<Review, 'id' | 'createdAt'>) => {
-    const newReview: Review = {
-      ...review,
-      id: Date.now().toString(),
-      createdAt: new Date(),
+  // Add review and save to Supabase
+  const addReview = async (review: Omit<Review, 'id' | 'createdAt'>) => {
+    if (!user) {
+      alert('You must be logged in to add a review');
+      return;
+    }
+
+    const newReview = {
+      user_id: user.id,
+      user_name: user.name,
+      movie_id: review.movieId,
+      rating: review.rating,
+      comment: review.comment,
+      created_at: new Date().toISOString(),
     };
-    setReviews((prev) => [...prev, newReview]);
+
+    const { data, error } = await supabase.from('reviews').insert(newReview).select();
+
+    if (error) {
+      console.error('❌ Error saving review:', error.message);
+      alert('Failed to save review. Please try again.');
+      return;
+    }
+
+    if (data && data.length > 0) {
+      setReviews((prev) => [
+        {
+          id: data[0].id,
+          movieId: data[0].movie_id,
+          rating: data[0].rating,
+          comment: data[0].comment,
+          createdAt: new Date(data[0].created_at),
+        } as Review,
+        ...prev,
+      ]);
+    }
   };
 
-  // ✅ Render logic
+  // Render logic
   if (showLogin) {
     return (
       <LoginForm
@@ -210,7 +276,6 @@ function App() {
   return (
     <>
       <Homepage onShowLogin={() => setShowLogin(true)} />
-      {/* Optional fallback debug UI */}
       <div style={{ textAlign: 'center', paddingTop: '2rem', color: '#888' }}>
         <p>Loading CineCircle...</p>
       </div>
