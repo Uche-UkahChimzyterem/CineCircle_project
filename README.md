@@ -1,17 +1,21 @@
-````markdown
-# Cinecircle
+```
+```
+## Cinecircle
 
 Cinecircle is a sleek movie review and rating web application that gives users the ability to discover, search, review, and rate movies. While everyone can access the homepage, users must sign up or log in to search for movies, write reviews, leave star ratings, and view their review history.
 
 Now when you search for movies like "Avatar", "Spider-Man", "Batman", "Dune", or any other popular film, you'll find them in the database. The search works by title, director, or genre, so you can search broadly (like "Action" or "Sci-Fi") or specifically by movie name.
 
 ---
-
+```
+```
 ## Overview
 
 Cinecircle provides a simple, elegant way to manage and engage with movie content. It is designed for movie lovers to share their opinions, keep track of what they've watched, and rate films based on personal experiences.
 
 ---
+```
+```
 
 ## Features
 
@@ -36,36 +40,44 @@ Cinecircle provides a simple, elegant way to manage and engage with movie conten
 - Responsive Design  
   Fully optimized for mobile, tablet, and desktop screens.
 
+```
 ---
-
+```
 ### Frontend
 
 - Framework: React + Vite  
 - Language: TypeScript  
 - Styling: Tailwind CSS  
 - Icons: Lucide React  
-- State Management: React Hooks  
+- State Management: React Hooks
+```
 
 ---
+```
 
 ## Backend
 
 - Authentication and user management powered by [Supabase Auth](https://supabase.com/docs/guides/auth)  
 - PostgreSQL database with RLS (Row Level Security) policies for secure data access  
 - Reviews and user data stored in Supabase tables  
-- Email verification enabled for secure signup  
+- Email verification enabled for secure signup
+``` 
 
 ---
-
+```
 ## Environment Variables
 
 Create a `.env` file in the project root and add the following variables:
 
-```env
+```
+```
+env
 VITE_SUPABASE_URL=your-supabase-project-url
 VITE_SUPABASE_ANON_KEY=your-anon-public-api-key
 VITE_TMDB_API_KEY=your-tmdb-api-key
-````
+
+```
+```
 
 Replace the placeholders with your actual API keys.
 
@@ -82,7 +94,7 @@ New users will receive a confirmation email upon signup. They must verify their 
 ## Deployed Project
 
 The live version of Cinecircle is hosted on Vercel and accessible here:
-👉 [https://cinecircle.vercel.app](https://cinecircle.vercel.app) *(Replace with actual link after deploy)*
+👉 [https://cine-circle-project-d6aglmnbq.vercel.app/](https://cine-circle-project-d6aglmnbq.vercel.app/) 
 
 ---
 
