@@ -16,7 +16,13 @@ function App() {
   const [searching, setSearching] = useState(false);
   const [genreMap, setGenreMap] = useState<Map<number, string>>(new Map());
 
-  // Sync Supabase Auth state on mount
+  // ✅ Log env var to catch undefined key
+  useEffect(() => {
+    console.log('TMDB API KEY:', API_KEY || '❌ MISSING');
+    if (!API_KEY) alert('Missing TMDB API Key. App may not work correctly.');
+  }, []);
+
+  // ✅ Sync Supabase Auth state
   useEffect(() => {
     const getSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -51,9 +57,10 @@ function App() {
     };
   }, []);
 
-  // Fetch genres from TMDB API
+  // ✅ Fetch genres from TMDB
   useEffect(() => {
     const fetchGenres = async () => {
+      if (!API_KEY) return;
       try {
         const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}`);
         const data = await res.json();
@@ -61,15 +68,15 @@ function App() {
         data.genres.forEach((g: any) => map.set(g.id, g.name));
         setGenreMap(map);
       } catch (err) {
-        console.error('Failed to fetch genres:', err);
+        console.error('❌ Failed to fetch genres:', err);
       }
     };
     fetchGenres();
   }, []);
 
-  // Search movies
+  // ✅ Search movies from TMDB
   const searchMovies = async (query: string) => {
-    if (!query.trim()) return;
+    if (!API_KEY || !query.trim()) return;
     setSearching(true);
     try {
       const res = await fetch(
@@ -77,7 +84,7 @@ function App() {
       );
       const data = await res.json();
 
-      if (data.results && data.results.length > 0) {
+      if (data.results?.length > 0) {
         const detailedMovies: Movie[] = await Promise.all(
           data.results.map(async (item: any) => {
             let director = 'Unknown';
@@ -89,12 +96,12 @@ function App() {
               const directorData = creditsData.crew.find((c: any) => c.job === 'Director');
               if (directorData) director = directorData.name;
             } catch {
-              console.warn(`Failed to fetch director for movie ${item.id}`);
+              console.warn(`⚠️ Failed to fetch director for movie ${item.id}`);
             }
 
             const genreNames = item.genre_ids
               .map((id: number) => genreMap.get(id))
-              .filter((g) => g)
+              .filter(Boolean)
               .join(', ') || 'Unknown';
 
             return {
@@ -106,7 +113,7 @@ function App() {
               poster: item.poster_path
                 ? `https://image.tmdb.org/t/p/w300${item.poster_path}`
                 : 'https://via.placeholder.com/300x450?text=No+Image',
-            } as Movie;
+            };
           })
         );
         setMovies(detailedMovies);
@@ -114,20 +121,17 @@ function App() {
         setMovies([]);
       }
     } catch (err) {
-      console.error('Failed to fetch movies:', err);
+      console.error('❌ Failed to fetch movies:', err);
       setMovies([]);
     } finally {
       setSearching(false);
     }
   };
 
-  // Supabase login
+  // ✅ Login
   const handleLogin = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      alert(`Login failed: ${error.message}`);
-      return;
-    }
+    if (error) return alert(`Login failed: ${error.message}`);
     if (data.user) {
       setUser({
         id: data.user.id,
@@ -139,17 +143,14 @@ function App() {
     }
   };
 
-  // Supabase signup
+  // ✅ Signup
   const handleSignup = async (email: string, password: string, name: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: name } }
     });
-    if (error) {
-      alert(`Signup failed: ${error.message}`);
-      return;
-    }
+    if (error) return alert(`Signup failed: ${error.message}`);
     if (data.user) {
       setUser({
         id: data.user.id,
@@ -161,7 +162,7 @@ function App() {
     }
   };
 
-  // Supabase logout
+  // ✅ Logout
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -169,7 +170,7 @@ function App() {
     setMovies([]);
   };
 
-  // Add review (local only)
+  // ✅ Add Review
   const addReview = (review: Omit<Review, 'id' | 'createdAt'>) => {
     const newReview: Review = {
       ...review,
@@ -179,6 +180,7 @@ function App() {
     setReviews((prev) => [...prev, newReview]);
   };
 
+  // ✅ Render logic
   if (showLogin) {
     return (
       <LoginForm
@@ -205,7 +207,15 @@ function App() {
     );
   }
 
-  return <Homepage onShowLogin={() => setShowLogin(true)} />;
+  return (
+    <>
+      <Homepage onShowLogin={() => setShowLogin(true)} />
+      {/* Optional fallback debug UI */}
+      <div style={{ textAlign: 'center', paddingTop: '2rem', color: '#888' }}>
+        <p>Loading CineCircle...</p>
+      </div>
+    </>
+  );
 }
 
 export default App;
